@@ -10,6 +10,7 @@ from rest_framework import status
 
 # returns full URL path
 CREATE_USER_URL = reverse("user:create")
+TOKEN_URL = reverse("user:token")
 
 def create_user(**params):
     """Create and return a new User."""
@@ -48,7 +49,7 @@ class PublicUserApiTests(TestCase):
             'password': 'password+123',
             'name': 'John Doe',
         }
-        # pass dictionary in as kwargs
+        # pass dictionary in as kwargs - defined above
         create_user(**payload)
         res = self.client.post(CREATE_USER_URL, payload)
 
@@ -68,3 +69,80 @@ class PublicUserApiTests(TestCase):
             email=payload['email']
         ).exists()
         self.assertFalse(user_exists)
+    
+    def test_create_token_for_user(self):
+        """Test generate token for valid credentials."""
+        user_detials = {
+            'name': 'Jessica Jones',
+            'email': 'test1@example.com',
+            'password': 'TestWord#!9876',
+        }
+        create_user(**user_detials)
+        # We don't need 'name' to login
+        payload = {
+            'email': user_detials['email'],
+            'password': user_detials['password']
+        }
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('token', res.data)
+    
+    def test_create_token_bad_email(self):
+        """Test returns error if email credentials are invalid."""
+        user_detials = {
+            'name': 'Matthew Murdock',
+            'email': 'test2@example.com',
+            'password': 'TestWord#!9876',
+        }
+        create_user(**user_detials)
+        # We don't need 'name' to login
+        # Testing Wrong Email
+        payload = {
+            'email': 'wrong_email@example.com',
+            'password': user_detials['password'],
+        }
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+        # Blank Email?
+        payload = {
+            'email': '',
+            'password': user_detials['password'],
+        }
+        res = self.client.post(TOKEN_URL, payload)
+        
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+    def test_create_token_bad_password(self):
+        """Test returns error if Password credentials are invalid."""
+        user_detials = {
+            'name': 'Tony Stark',
+            'email': 'test3@example.com',
+            'password': 'TestWord#!9876',
+        }
+
+        create_user(**user_detials)
+        # We don't need 'name' to login
+        # Testing Wrong Password
+        payload = {
+            'email': user_detials['email'],
+            'password': '$Wrong_Password=123',
+        }
+        res = self.client.post(TOKEN_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
+
+        # Blank Password?
+        payload = {
+            'email': user_detials['email'],
+            'password': '',
+        }
+        res = self.client.post(TOKEN_URL, payload)
+        
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn('token', res.data)
