@@ -98,5 +98,5 @@ class PrivateTagsApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
             # Check that we get HTTP 204 NO CONTENT
         tags = Tag.objects.filter(pk=tag.id)
-        self.assertEqual(tags.exists())
+        self.assertFalse(tags.exists())
             # check that our tag no longer exists.
