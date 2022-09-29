@@ -217,7 +217,7 @@ class PrivateRecipeAPITests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(Recipe.objects.filter(pk=recipe.id).exists())
     
-    def create_recipe_with_new_tags(self) -> None:
+    def test_create_recipe_with_new_tags(self) -> None:
         """Test creating a recipe with new tags."""
         def payload_maker(**kwargs) -> dict:
             return kwargs
@@ -240,3 +240,31 @@ class PrivateRecipeAPITests(TestCase):
                 user=self.user,
             ).exists()
             self.assertTrue(exists)
+    
+    def test_create_recipe_with_existing_tags(self) -> None:
+        """Test creating a recipe with existing tag."""
+        tag_vegan = Tag.objects.create(user=self.user, name='Vegan')
+        def payload_maker(**kwargs) -> dict:
+            return kwargs
+        payload = payload_maker(
+            title='Tofu Stir-Fry',
+            time_minutes=20,
+            price=Decimal('9.99'),
+            tags=[{'name': 'Vegan'}, {'name': 'Dinner'}]
+        )
+        res = self.client.post(RECIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+        recipes = Recipe.objects.filter(user=self.user)
+        self.assertEqual(recipes.count(), 1)
+        recipe = recipes[0]
+        self.assertEqual(recipe.tags.count(), 2)
+        self.assertIn(tag_vegan, recipe.tags.all())
+        for tag in payload['tags']:
+            exists = recipe.tags.filter(
+                name=tag['name'],
+                user=self.user,
+            ).exists()
+            self.assertTrue(exists)
+
