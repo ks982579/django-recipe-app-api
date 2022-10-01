@@ -280,3 +280,23 @@ class PrivateRecipeAPITests(TestCase):
         new_tag = Tag.objects.get(user=self.user, name='Lunch')
         # recipe.refresh_from_db() Not necessary for ManyToManyField fields. 
         self.assertIn(new_tag, recipe.tags.all())
+    
+    def test_update_recipe_assign_tag(self):
+        """Test assigning an existing tag when updating a recipe."""
+        tag_breakfast = Tag.objects.create(user=self.user, name='Breakfast')
+        recipe = create_recipe(user=self.user)
+        recipe.tags.add(tag_breakfast)
+            # Adding "Breakfast" tag to the recipe
+        
+        tag_lunch = Tag.objects.create(user=self.user, name="Lunch")
+
+        payload = {'tags': [{'name': 'Lunch'}]}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(tag_lunch, recipe.tags.all())
+            # Check that "Lunch" is an included tag.
+        self.assertNotIn(tag_breakfast, recipe.tags.all())
+            # Check the "Breakfast" was removed from the recipe tags. 
+
