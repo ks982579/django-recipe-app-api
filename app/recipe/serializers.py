@@ -36,6 +36,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data) -> Recipe:
         """Create a recipe, allowing for nested TagSerializer."""
         tags = validated_data.pop('tags', [])
+        ingredients = validated_data.pop('ingredients', [])
         recipe = Recipe.objects.create(**validated_data)
             # create recipe.
         self._get_or_create_tags(tags, recipe)
@@ -45,6 +46,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data) -> Recipe:
         """Update a recipe, allowing for nested TagSerializer."""
         tags = validated_data.pop('tags', None)
+        ingredients = validated_data.pop('ingredients', None)
 
         if tags is not None:
             instance.tags.clear()
