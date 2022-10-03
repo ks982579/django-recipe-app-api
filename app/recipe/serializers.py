@@ -4,7 +4,14 @@ Serializers for recipe APIs.
 
 from attr import validate
 from rest_framework import serializers
-from core.models import (Recipe, Tag)
+from core.models import (Recipe, Tag, Ingredient)
+
+class IngredientSerializer(serializers.ModelSerializer):
+    """Serializer for Ingredients model."""
+    class Meta:
+        model = Ingredient
+        fields = '__all__'
+        read_only_fields = ['id']
 
 class TagSerializer(serializers.ModelSerializer):
     """Serializer for tags."""
