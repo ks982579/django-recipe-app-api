@@ -330,8 +330,6 @@ class PrivateRecipeAPITests(TestCase):
                 {'name':'noodles'}
                 ]
         )
-        ingredients = Ingredient.objects.filter(user=self.user)
-        self.assertEqual(ingredients.count(), 4)
 
         res = self.client.post(RECIPES_URL, payload, format='json')
 
@@ -347,3 +345,44 @@ class PrivateRecipeAPITests(TestCase):
                 user=self.user
             ).exists()
             self.assertTrue(exists)
+
+    def test_create_recipe_with_existing_ingredients(self):
+        """Test creating a new recipe with existing ingredients."""
+        ingredient1 = Ingredient.objects.create(user=self.user, name="broccoli")
+        ingredient2 = Ingredient.objects.create(user=self.user, name="noodles")
+
+        ingredients = Ingredient.objects.filter(user=self.user)
+        self.assertEqual(ingredients.count(), 2)
+
+        def payload_maker(**kwargs) -> dict:
+            return kwargs
+        payload = payload_maker(
+            title='Tofu Stir-Fry',
+            time_minutes=20,
+            price=Decimal('9.99'),
+            tags=[{'name': 'Vegan'}, {'name': 'Dinner'}],
+            ingredients=[
+                {'name':'broccoli'},
+                {'name':'onion'},
+                {'name':'pepper'},
+                {'name':'noodles'}
+                ]
+        )
+        res = self.client.post(RECIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipes = Recipe.objects.filter(user=self.user)
+        self.assertEqual(recipes.count(), 1)
+        recipe = recipes[0]
+        self.assertEqual(recipe.ingredients.count(), 4)
+
+        self.assertIn(ingredient1, recipe.ingredients.all())
+        self.assertIn(ingredient2, recipe.ingredients.all())
+        for ingredient in payload['ingredients']:
+            exists = recipe.ingredients.fileter(
+                name=ingredient['name'],
+                user=self.user
+            ).exists()
+            self.assertTrue(exists)
+        
+        self.assertEqual(Ingredient.objects.filter(user=self.user).count(), 4)
