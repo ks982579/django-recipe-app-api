@@ -23,6 +23,7 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes."""
     tags = TagSerializer(many=True, required=False)
+    ingredients = IngredientSerializer(many=True, required=False)
 
     class Meta:
         model = Recipe
@@ -39,6 +40,17 @@ class RecipeSerializer(serializers.ModelSerializer):
                 **tag,
             )
             recipe.tags.add(tag_obj)
+    
+    def _get_or_create_ingredients(self, ingredients, recipe):
+        """Handle getting or creating ingredients as needed."""
+        auth_user = self.context['request'].user
+        for ingredient in ingredients:
+            ingredient_obj, created = Ingredient.objects.get_or_create(
+                user=auth_user,
+                **ingredient,
+            ) # Get or Create new ingredient
+            recipe.ingredients.add(ingredient_obj)
+                # Add incredient to ManyToManyField
 
     def create(self, validated_data) -> Recipe:
         """Create a recipe, allowing for nested TagSerializer."""
@@ -48,6 +60,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             # create recipe.
         self._get_or_create_tags(tags, recipe)
             # create or assign tags as needed
+        self._get_or_create_ingredients(ingredients, recipe)
+            # create or assign ingredients as needed
         return recipe
     
     def update(self, instance, validated_data) -> Recipe:

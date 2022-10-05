@@ -327,11 +327,15 @@ class PrivateRecipeAPITests(TestCase):
                 {'name':'broccoli'},
                 {'name':'onion'},
                 {'name':'pepper'},
-                {'name':'noodles'}
-                ]
+                {'name':'noodles'},
+            ]
         )
-
+        print(f'\nPayload:')
+        print(payload)
         res = self.client.post(RECIPES_URL, payload, format='json')
+        print()
+        print(f'Response:')
+        print(res.data)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.obects.filter(user=self.user)
@@ -365,9 +369,9 @@ class PrivateRecipeAPITests(TestCase):
                 {'name':'broccoli'},
                 {'name':'onion'},
                 {'name':'pepper'},
-                {'name':'noodles'}
-                ]
+                {'name':'noodles'}]
         )
+        print(payload)
         res = self.client.post(RECIPES_URL, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
