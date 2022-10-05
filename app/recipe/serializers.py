@@ -10,7 +10,7 @@ class IngredientSerializer(serializers.ModelSerializer):
     """Serializer for Ingredients model."""
     class Meta:
         model = Ingredient
-        fields = '__all__'
+        fields = ['id', 'name'] #'__all__' does not work w/endpoint
         read_only_fields = ['id']
 
 class TagSerializer(serializers.ModelSerializer):

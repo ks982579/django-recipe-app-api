@@ -318,27 +318,19 @@ class PrivateRecipeAPITests(TestCase):
         """Test creating a recipe with new ingredients."""
         def payload_maker(**kwargs) -> dict:
             return kwargs
+        ingredient_list = [{'name': 'salt'}, {'name': 'pepper'}, {'name': 'onion'}, {'name': 'apple'},]
         payload = payload_maker(
             title='Tofu Stir-Fry',
             time_minutes=20,
             price=Decimal('9.99'),
             tags=[{'name': 'Vegan'}, {'name': 'Dinner'}],
-            ingredients=[
-                {'name':'broccoli'},
-                {'name':'onion'},
-                {'name':'pepper'},
-                {'name':'noodles'},
-            ]
+            ingredients=ingredient_list,
         )
-        print(f'\nPayload:')
-        print(payload)
+
         res = self.client.post(RECIPES_URL, payload, format='json')
-        print()
-        print(f'Response:')
-        print(res.data)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        recipes = Recipe.obects.filter(user=self.user)
+        recipes = Recipe.objects.filter(user=self.user)
         self.assertEqual(recipes.count(), 1)
         recipe = recipes[0]
         self.assertEqual(recipe.ingredients.count(), 4)
@@ -371,7 +363,6 @@ class PrivateRecipeAPITests(TestCase):
                 {'name':'pepper'},
                 {'name':'noodles'}]
         )
-        print(payload)
         res = self.client.post(RECIPES_URL, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -383,7 +374,7 @@ class PrivateRecipeAPITests(TestCase):
         self.assertIn(ingredient1, recipe.ingredients.all())
         self.assertIn(ingredient2, recipe.ingredients.all())
         for ingredient in payload['ingredients']:
-            exists = recipe.ingredients.fileter(
+            exists = recipe.ingredients.filter(
                 name=ingredient['name'],
                 user=self.user
             ).exists()
