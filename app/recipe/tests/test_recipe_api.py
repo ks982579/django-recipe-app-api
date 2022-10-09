@@ -316,8 +316,6 @@ class PrivateRecipeAPITests(TestCase):
     
     def test_create_recipe_with_new_ingredients(self):
         """Test creating a recipe with new ingredients."""
-        print('\n')
-        print("CREATING RECIPE W/NEW INGREDIENTS")
         def payload_maker(**kwargs) -> dict:
             return kwargs
         ingredient_list = [{'name': 'salt'}, {'name': 'pepper'}, {'name': 'onion'}, {'name': 'apple'},]
