@@ -397,17 +397,27 @@ class PrivateRecipeAPITests(TestCase):
 
     def test_update_recipe_assign_ingredient(self):
         """Test assigning an existing ingredient with updating a recipe."""
+        print("\n")
+        print("Testing update recipe w/ingredients")
         ingredient1 = Ingredient.objects.create(user=self.user, name='pepper')
         recipe = create_recipe(user=self.user)
         recipe.ingredients.add(ingredient1)
 
         ingredient2 = Ingredient.objects.create(user=self.user, name='salt')
             # create second ingredient
-        payload = {'ingredients': {'name': 'salt'}}
+        payload = {'ingredients': [{'name': 'salt'}]}
             # reference second ingredient
         url = detail_url(recipe.id)
 
         res = self.client.patch(url, payload, format='json')
+        print("\n\n")
+        #print(dir(res))
+        print(res.context)
+        print(res.data)
+        print(res.content)
+        print(res.tell())
+        help(res.tell)
+        print("\n\n")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(ingredient2, recipe.ingredients.all())
         self.assertNotIn(ingredient1, recipe.ingredients.all())
