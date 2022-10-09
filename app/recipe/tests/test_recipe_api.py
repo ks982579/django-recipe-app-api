@@ -316,6 +316,8 @@ class PrivateRecipeAPITests(TestCase):
     
     def test_create_recipe_with_new_ingredients(self):
         """Test creating a recipe with new ingredients."""
+        print('\n')
+        print("CREATING RECIPE W/NEW INGREDIENTS")
         def payload_maker(**kwargs) -> dict:
             return kwargs
         ingredient_list = [{'name': 'salt'}, {'name': 'pepper'}, {'name': 'onion'}, {'name': 'apple'},]
@@ -328,7 +330,6 @@ class PrivateRecipeAPITests(TestCase):
         )
 
         res = self.client.post(RECIPES_URL, payload, format='json')
-
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.objects.filter(user=self.user)
         self.assertEqual(recipes.count(), 1)
@@ -397,8 +398,6 @@ class PrivateRecipeAPITests(TestCase):
 
     def test_update_recipe_assign_ingredient(self):
         """Test assigning an existing ingredient with updating a recipe."""
-        print("\n")
-        print("Testing update recipe w/ingredients")
         ingredient1 = Ingredient.objects.create(user=self.user, name='pepper')
         recipe = create_recipe(user=self.user)
         recipe.ingredients.add(ingredient1)
@@ -410,14 +409,6 @@ class PrivateRecipeAPITests(TestCase):
         url = detail_url(recipe.id)
 
         res = self.client.patch(url, payload, format='json')
-        print("\n\n")
-        #print(dir(res))
-        print(res.context)
-        print(res.data)
-        print(res.content)
-        print(res.tell())
-        help(res.tell)
-        print("\n\n")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(ingredient2, recipe.ingredients.all())
         self.assertNotIn(ingredient1, recipe.ingredients.all())
