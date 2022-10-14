@@ -467,7 +467,7 @@ class PrivateRecipeAPITests(TestCase):
 
         r3 = create_recipe(user=self.user, title="Red Lentil Dahl")
 
-        params = {"ingredients": {"name": f'{in1}, {in2}'}}
+        params = {"ingredients": {"name": f'{in1.id},{in2.id}'}}
         res = self.client.get(RECIPES_URL, params)
 
         s1 = RecipeSerializer(r1)
