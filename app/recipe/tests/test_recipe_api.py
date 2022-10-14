@@ -459,6 +459,24 @@ class PrivateRecipeAPITests(TestCase):
     def test_filter_by_ingredients(self):
         """Test filtering recipes by ingredients."""
         r1 = create_recipe(user=self.user, title="Posh Beans on Toast")
+        r2 = create_recipe(user=self.user, title="Chicken Cacciatore")
+        in1 = Ingredient.objects.create(user=self.user, name="Feta Cheese")
+        in2 = Ingredient.objects.create(user=self.user, name="Chicken")
+        r1.ingredients.add(in1)
+        r2.ingredients.add(in1)
+
+        r3 = create_recipe(user=self.user, title="Red Lentil Dahl")
+
+        params = {"ingredients": {"name": f'{in1}, {in2}'}}
+        res = self.client.get(RECIPES_URL, params)
+
+        s1 = RecipeSerializer(r1)
+        s2 = RecipeSerializer(r2)
+        s3 = RecipeSerializer(r3)
+
+        self.assertIn(s1.data, res.data)
+        self.assertIn(s2.data, res.data)
+        self.assertNotIn(s3.data, res.data)
 
 class ImageUploadTests(TestCase):
     """Tests for the image upload API."""
