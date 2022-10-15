@@ -83,7 +83,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'assigned_only',
+                OpenApiTypes.INT, enum=[0, 1],
+                description="Filter by items assigned to recipes.",
+            )
+        ]
+    )
+)
 class BaseRecipeAttrViewSet(mixins.UpdateModelMixin, 
                             mixins.ListModelMixin, 
                             mixins.DestroyModelMixin,
@@ -111,7 +121,3 @@ class IngredientViewSet(BaseRecipeAttrViewSet):
     """Manage Ingredients in the database."""
     serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
-
-    def get_queryset(self):
-        """Filter queryset to authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
