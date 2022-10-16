@@ -336,6 +336,7 @@ class PrivateRecipeAPITests(TestCase):
         )
 
         res = self.client.post(RECIPES_URL, payload, format='json')
+
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.objects.filter(user=self.user)
         self.assertEqual(recipes.count(), 1)
